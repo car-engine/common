@@ -69,8 +69,8 @@ function [sig_aligned, qf, tdoa, fdoa] = xcorr_subsample_tdfd(sig, ref_sig, chnB
                 qf(n) = qf;
                 tdoa(n) = tdoa;
         
-                % TD shift to align with cut1
-                timeshift = exp(-1i*2*pi*fft_freqs*-tdoa); % negative tdoa because we are shifting sig (cut2) towards ref_sig (cut1)
+                % TD shift to align with ref_sig
+                timeshift = exp(-1i*2*pi*fft_freqs*-tdoa); % negative tdoa because we are shifting sig (b) towards ref_sig (a)
                 sig_aligned(n,:) = ifft(ifftshift(fftshift(fft(b)).*timeshift));
                 
             end % end loop over sensors
@@ -78,7 +78,7 @@ function [sig_aligned, qf, tdoa, fdoa] = xcorr_subsample_tdfd(sig, ref_sig, chnB
         case 'TD/FD'
 
             % Pre-compute for reference signal
-            a_freqshift = cut1.*freq_mat;
+            a_freqshift = ref_sig.*freq_mat;
             a_freqshift_fft = fftshift(fft(a_freqshift, [], 2), 2);
             a_freqshift_fft_norm = a_freqshift_fft./vecnorm(a_freqshift_fft, 2, 2);
 
@@ -113,9 +113,9 @@ function [sig_aligned, qf, tdoa, fdoa] = xcorr_subsample_tdfd(sig, ref_sig, chnB
                 tdoa(n) = tdoa;
                 fdoa(n) = fdoa;
                 
-                % TD and FD shift to align with cut1
-                timeshift = exp(-1i*2*pi*fft_freqs*-tdoa); % negative tdoa because we are shifting sig (cut2) towards ref_sig (cut1)
-                freqshift = exp(1i*2*pi*-fdoa/chnBW*(0:cut1_length-1)); % negative fdoa because we are shifting sig (cut2) towards ref_sig (cut1)
+                % TD and FD shift to align with a
+                timeshift = exp(-1i*2*pi*fft_freqs*-tdoa); % negative tdoa because we are shifting ref_sig (b) towards ref_sig (a)
+                freqshift = exp(1i*2*pi*-fdoa/chnBW*(0:ref_sig_length-1)); % negative fdoa because we are shifting sig (a) towards ref_sig (a)
                 sig_aligned(n,:) = ifft(ifftshift(fftshift(fft(b.*freqshift)).*timeshift));
             
             end  % end loop over sensors    
